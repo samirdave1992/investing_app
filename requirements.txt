@@ -1,5 +1,5 @@
-streamlit~=0.62.0
-pandas~=0.2.20
+streamlit==1.23.0
+pandas
 numpy 
-yfinance 
+yfinance~=0.2.20
 time
