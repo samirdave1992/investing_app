@@ -86,7 +86,7 @@ if page=="Top Investor's holdings":
                 df['Ticker']=df.Stock.str.extract('(.*)- ', expand=False)
                 df['Ticker'] = df['Ticker'].str.replace('.','-')
                 df = df.rename(columns={"""% of Portfolio""": 'percentage_of_portfolio',"""ReportedPrice*""": 'reported_price'})
-                df=df[["Stock","Ticker","percentage_of_portfolio","RecentActivity","Shares","reported_price","Value","Current Price","52Week Low"]]
+                df=df[["Stock","Ticker","percentage_of_portfolio","RecentActivity","Shares","reported_price","Value","Current Price","52Week Low","52Week High"]]
 
                 #df=df[["Stock","Ticker"]]
               #  df['Ticker'] = df['Ticker'].str.replace('.','-')
