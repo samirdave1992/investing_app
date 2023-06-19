@@ -151,9 +151,9 @@ if page=="Top Investor's holdings":
                     with col1:
                         st.metric("Previous Day Close", "$" + str(prev_close.round(2)))
                     with col2:
-                        st.metric("YTD return", str(YTD),difference.round(2))
+                        st.metric("YTD return and difference", str(YTD),difference.round(2))
                     with col3:
-                        st.metric("Five year Return-Rate", five_year_RTD,five_year_difference.round(2))
+                        st.metric("Five year Return-Rate and difference", five_year_RTD,five_year_difference.round(2))
 
 
             st.write(generating_visuals(visual_data))
