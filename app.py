@@ -85,10 +85,10 @@ if page=="Top Investor's holdings":
                 df=df[0]
                 df['Ticker']=df.Stock.str.extract('(.*)- ', expand=False)
                 df['Ticker'] = df['Ticker'].str.replace('.','-')
-                df=df[["Stock","Ticker"]]
+             #   df=df[["Stock","Ticker"]]
               #  df['Ticker'] = df['Ticker'].str.replace('.','-')
 
-                return df.columns,df
+                return df
 
 
             st.write(fetching_stock_data(investor=investors))
