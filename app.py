@@ -70,7 +70,7 @@ if page=="Top Investor's holdings":
         submit=st.form_submit_button('submit')
 
         if submit:
-            @st.cache(allow_output_mutation=True)
+        #    @st.cache(allow_output_mutation=True)
             def fetching_stock_data(investor=investors):
                 headers = {
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0',
@@ -95,56 +95,56 @@ if page=="Top Investor's holdings":
             visual_data=fetching_stock_data(investor=investors)
 
 ###
-            def generating_visuals(visual_data):
-                viz=[]
-                for index,row in visual_data.iterrows():
+            # def generating_visuals(visual_data):
+            #     viz=[]
+            #     for index,row in visual_data.iterrows():
 
-                    data=(yf.download(
-                    tickers = row['Ticker'],
+            #         data=(yf.download(
+            #         tickers = row['Ticker'],
 
-                    # What period of time are we interested in?
-                    # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
-                    # In our case we will choose 10y
-                    period = "5y",
+            #         # What period of time are we interested in?
+            #         # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+            #         # In our case we will choose 10y
+            #         period = "5y",
 
-                    # Next we need to define our interval.
-                    interval = "1d",
+            #         # Next we need to define our interval.
+            #         interval = "1d",
 
-                    # Ensure our data is grouped properly.
-                    group_by = 'ticker'
-                    ))
-                    columns = ["Date","Close"]
-                    data=data[['Close']]
-                    data.rename(index={1: 'a'},inplace=True)
-                    data['SMA_50'] = data['Close'].rolling(5).mean().shift()
-                    data['SMA_200'] = data['Close'].rolling(10).mean().shift()
+            #         # Ensure our data is grouped properly.
+            #         group_by = 'ticker'
+            #         ))
+            #         columns = ["Date","Close"]
+            #         data=data[['Close']]
+            #         data.rename(index={1: 'a'},inplace=True)
+            #         data['SMA_50'] = data['Close'].rolling(5).mean().shift()
+            #         data['SMA_200'] = data['Close'].rolling(10).mean().shift()
 
                     
 
-                    prev_close=data['Close'].max()
+            #         prev_close=data['Close'].max()
 
-                #    st.write(f"{row['Ticker']}")
-                    st.write(f"{row['Stock']}")
+            #     #    st.write(f"{row['Ticker']}")
+            #         st.write(f"{row['Stock']}")
                     
-                    new=data.reset_index()
+            #         new=data.reset_index()
 
-                 #   st.write(data)
+            #      #   st.write(data)
 
-                    new['Date'] = pd.to_datetime(new['Date']).dt.date
-                    new["Date"] = pd.to_datetime(new["Date"])
+            #         new['Date'] = pd.to_datetime(new['Date']).dt.date
+            #         new["Date"] = pd.to_datetime(new["Date"])
 
-                    minimum,maximum,YTD,five_year_RTD,five_year_p1,five_year_p2=insights(new)
-                    difference=maximum-minimum
-                    five_year_difference=five_year_p2-five_year_p1
+            #         minimum,maximum,YTD,five_year_RTD,five_year_p1,five_year_p2=insights(new)
+            #         difference=maximum-minimum
+            #         five_year_difference=five_year_p2-five_year_p1
 
-                    col1,col2,col3 = st.columns([1,1,1]) 
+            #         col1,col2,col3 = st.columns([1,1,1]) 
 
-                    with col1:
-                        st.metric("Previous Day Close", "$" + str(prev_close.round(2)))
-                    with col2:
-                        st.metric("YTD return and difference", str(YTD),difference.round(2))
-                    with col3:
-                        st.metric("Five year Return-Rate and difference", five_year_RTD,five_year_difference.round(2))
+            #         with col1:
+            #             st.metric("Previous Day Close", "$" + str(prev_close.round(2)))
+            #         with col2:
+            #             st.metric("YTD return and difference", str(YTD),difference.round(2))
+            #         with col3:
+            #             st.metric("Five year Return-Rate and difference", five_year_RTD,five_year_difference.round(2))
 
 
-            st.write(generating_visuals(visual_data))
+            # st.write(generating_visuals(visual_data))
