@@ -89,7 +89,7 @@ if page=="Top Investor's holdings":
                # df=df[["Stock","Ticker","% ofPortfolio","RecentActivity","Shares","ReportedPrice*","Value","CurrentPrice","+/-ReportedPrice","52WeekLow","52WeekHigh"]]
               #  df['Ticker'] = df['Ticker'].str.replace('.','-')
 
-                return df.info()
+                return df.columns
 
 
             st.write(fetching_stock_data(investor=investors))
