@@ -7,18 +7,10 @@ import time
 import datetime
 from datetime import datetime
 from datetime import date
-# from IPython.display import HTML
 from datetime import timedelta
-# import seaborn as sns
-# import altair as alt
 import warnings
 import requests
-# import plotly as plt
-# import chart_studio.plotly as py
-# import plotly.graph_objs as go
-# import plotly.express as px
-# from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-# from bs4 import BeautifulSoup
+
 
 st.set_page_config(layout='wide')
 
