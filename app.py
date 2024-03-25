@@ -7,20 +7,53 @@ import datetime
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
-import warnings
+# import warnings
+# from mitosheet.streamlit.v1 import spreadsheet
+# from mitosheet.streamlit.v1.spreadsheet import _get_mito_backend
+
 import requests
+
+pd.options.display.max_rows = 100
 
 
 st.set_page_config(layout='wide')
 
-st.title("Invest like the Bulls of our time")
 
 page=st.sidebar.radio(
     "Choose from the following options:",
-    ("Top Investor's holdings","Investing Basics: Work in Progress"))
+    ("Top Investor's holdings","Grand Portfolio of Investors:$932 B"))
+
+
+
+@st.cache_data(experimental_allow_widgets=True)
+def insights(df):
+    current_date=(datetime.now().year)
+    last_5_year=current_date-5
+                
+    current_year_data=df[df['Date']>=f"{current_date}-01-01"]
+    price1=current_year_data['Close'].iloc[0].round(2)
+    price2=current_year_data['Close'].iloc[-1].round(2)
+    pct=(price2-price1)/price1
+    pct="{:.2%}".format(pct)
+
+    #5 year RR
+    last_5_year=current_date=(datetime.now().year)-5
+    last_5_year_data=df[df['Date']>=f"{last_5_year}-01-01"]
+    five_year_price1=last_5_year_data['Close'].iloc[0].round(2)
+    five_year_price2=last_5_year_data['Close'].iloc[-1].round(2)
+
+    five_year_pct=(five_year_price2-five_year_price1)/five_year_price1
+    five_year_pct="{:.2%}".format(five_year_pct)
+    # five_year_pct="{:.2%}".format(pct)
+
+    return price1,price2,pct,five_year_pct,five_year_price1,five_year_price2
+
 
 ###
 if page=="Top Investor's holdings":
+
+
+    st.title("Invest like the Bulls of our time")
 
     st.markdown("""
     ### By selecting the Investor, you will be able to get details of their holdings.
@@ -39,29 +72,28 @@ if page=="Top Investor's holdings":
 #    st.write(investor_dict.get('Michael Burry'))
 
 ###
-    @st.cache(allow_output_mutation=True)
 
-    def insights(df):
-        current_date=(datetime.now().year)
-        last_5_year=current_date-5
+    # def insights(df):
+    #     current_date=(datetime.now().year)
+    #     last_5_year=current_date-5
                     
-        current_year_data=df[df['Date']>=f"{current_date}-01-01"]
-        price1=current_year_data['Close'].iloc[0].round(2)
-        price2=current_year_data['Close'].iloc[-1].round(2)
-        pct=(price2-price1)/price1
-        pct="{:.2%}".format(pct)
+    #     current_year_data=df[df['Date']>=f"{current_date}-01-01"]
+    #     price1=current_year_data['Close'].iloc[0].round(2)
+    #     price2=current_year_data['Close'].iloc[-1].round(2)
+    #     pct=(price2-price1)/price1
+    #     pct="{:.2%}".format(pct)
 
-        #5 year RR
-        last_5_year=current_date=(datetime.now().year)-5
-        last_5_year_data=df[df['Date']>=f"{last_5_year}-01-01"]
-        five_year_price1=last_5_year_data['Close'].iloc[0].round(2)
-        five_year_price2=last_5_year_data['Close'].iloc[-1].round(2)
+    #     #5 year RR
+    #     last_5_year=current_date=(datetime.now().year)-5
+    #     last_5_year_data=df[df['Date']>=f"{last_5_year}-01-01"]
+    #     five_year_price1=last_5_year_data['Close'].iloc[0].round(2)
+    #     five_year_price2=last_5_year_data['Close'].iloc[-1].round(2)
 
-        five_year_pct=(five_year_price2-five_year_price1)/five_year_price1
-        five_year_pct="{:.2%}".format(five_year_pct)
-       # five_year_pct="{:.2%}".format(pct)
+    #     five_year_pct=(five_year_price2-five_year_price1)/five_year_price1
+    #     five_year_pct="{:.2%}".format(five_year_pct)
+    #    # five_year_pct="{:.2%}".format(pct)
 
-        return price1,price2,pct,five_year_pct,five_year_price1,five_year_price2
+    #     return price1,price2,pct,five_year_pct,five_year_price1,five_year_price2
 
 ###
     with st.form('form'):
@@ -91,7 +123,7 @@ if page=="Top Investor's holdings":
                 #df=df[["Stock","Ticker"]]
               #  df['Ticker'] = df['Ticker'].str.replace('.','-')
 
-                return df
+                return df.head()
 
 
             st.write(fetching_stock_data(investor=investors))
@@ -152,3 +184,100 @@ if page=="Top Investor's holdings":
 
 
             st.write(generating_visuals(visual_data))
+
+
+
+elif page=="Grand Portfolio of Investors:$932 B":
+   
+    top_holdings_url="https://www.dataroma.com/m/g/portfolio.php?o=c"
+
+    st.markdown("## This view shows top 100 stocks owned by most Investors.")
+    st.markdown("[Data source Link](https://www.dataroma.com/m/g/portfolio.php)")
+
+
+    def fetching_top_holdings_stock_data():
+        headers = {
+                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0',
+                 }
+        
+        r = requests.get(top_holdings_url, headers=headers)
+        c = r.content
+
+       # pd.set_option('max_rows',500)
+
+        df=pd.read_html(c)
+        df=df[0]
+
+
+
+        df['Ticker']=df.Stock.str.extract('(.*)- ', expand=False)
+        df['Ticker'] = df['Ticker'].str.replace('.','-')
+        #df = df.rename(columns={"""% of Portfolio""": 'percentage_of_portfolio',"""ReportedPrice*""": 'reported_price'})
+        #df=df[["Stock","Ticker","percentage_of_portfolio","RecentActivity","Shares","reported_price","Value","Current Price","52Week Low","52Week High"]]
+
+        #df=df[["Stock","Ticker"]]
+        #  df['Ticker'] = df['Ticker'].str.replace('.','-')
+
+        return df
+    
+
+    st.write(fetching_top_holdings_stock_data())
+
+    visuals_data=fetching_top_holdings_stock_data()
+
+    visuals_data['Symbol'] = visuals_data['Symbol'].str.replace('.','-')
+
+    def generating_visuals_main(visuals_data):
+        viz=[]
+        for index,row in visuals_data.iterrows():
+
+            data=(yf.download(
+            tickers = row['Symbol'],
+
+            # What period of time are we interested in?
+            # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
+            # In our case we will choose 10y
+            period = "5y",
+
+            # Next we need to define our interval.
+            interval = "1d",
+
+            # Ensure our data is grouped properly.
+            group_by = 'ticker'
+            ))
+            columns = ["Date","Close"]
+            data=data[['Close']]
+            data.rename(index={1: 'a'},inplace=True)
+            data['SMA_50'] = data['Close'].rolling(5).mean().shift()
+            data['SMA_200'] = data['Close'].rolling(10).mean().shift()
+
+            
+
+            prev_close=data['Close'].max()
+
+        #    st.write(f"{row['Ticker']}")
+            st.write(f"{row['Stock']}")
+            
+            new=data.reset_index()
+
+            #   st.write(data)
+
+            new['Date'] = pd.to_datetime(new['Date']).dt.date
+            new["Date"] = pd.to_datetime(new["Date"])
+
+            minimum,maximum,YTD,five_year_RTD,five_year_p1,five_year_p2=insights(new)
+            difference=maximum-minimum
+            five_year_difference=five_year_p2-five_year_p1
+
+            col1,col2,col3 = st.columns([1,1,1]) 
+
+            with col1:
+                st.metric("Previous Day Close", "$" + str(prev_close.round(2)))
+            with col2:
+                st.metric("YTD return and difference", str(YTD),difference.round(2))
+            with col3:
+                st.metric("Five year Return-Rate and difference", five_year_RTD,five_year_difference.round(2))
+
+
+    st.write(generating_visuals_main(visuals_data))
+
