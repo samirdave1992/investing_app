@@ -3,10 +3,18 @@ import pandas as pd
 import time
 import yfinance as yf
 import time
+import numpy as np
 import datetime
 from datetime import datetime
 from datetime import date
+import re
 from datetime import timedelta
+
+import plotly.graph_objects as go
+import plotly.express as px
+
+
+
 # import warnings
 # from mitosheet.streamlit.v1 import spreadsheet
 # from mitosheet.streamlit.v1.spreadsheet import _get_mito_backend
@@ -21,8 +29,9 @@ st.set_page_config(layout='wide')
 
 page=st.sidebar.radio(
     "Choose from the following options:",
-    ("Top Investor's holdings","Grand Portfolio of Investors:$932 B"))
+    ("Top Investor's holdings","Grand Portfolio of Investors:$932 B",'SMA Strategy'))
 
+today=datetime.today().strftime("%Y-%m-%d")
 
 
 @st.cache_data(experimental_allow_widgets=True)
@@ -280,4 +289,116 @@ elif page=="Grand Portfolio of Investors:$932 B":
 
 
     st.write(generating_visuals_main(visuals_data))
+
+elif page=="SMA Strategy":
+    st.subheader("Running SMA 50 and 200 strategy on top 10 S&P 500 holdings 📈 ")
+
+
+    def top_10_SPY():
+        table=pd.read_html('https://www.investopedia.com/articles/investing/122215/spy-spdr-sp-500-trust-etf.asp')
+        df = table[0]
+        df.reset_index(inplace=True)
+        df.columns=['id','company','pct']
+        df['company']=df['company'].str.replace('.','-')
+        ticker=[]
+        for data in df['company']:
+            ticker.append(re.search('\(([^)]+)', data).group(1))
+
+        return df[['company','pct']],ticker
+    
+    top_10,tickers=top_10_SPY()
+
+    st.write("Top 10 SPY tickers and holdings:",top_10)
+
+
+
+    df=yf.download(tickers,start='2021-01-01',end=today)
+
+    data=pd.DataFrame(df.Close)
+
+    
+
+
+
+    @st.cache_data(experimental_allow_widgets=True)
+    def SMA(data):
+
+        sma_s=50
+        sma_l=200
+    
+        for i in (data.columns):
+            st.write(f"Trends for {i}")
+            trends=data[i]
+         #   trend_d.append(data[i])
+            trends=pd.DataFrame(trends)
+            trends.columns=['close']
+
+
+            trends['sma_s']=trends.close.rolling(sma_s).mean()
+            trends['sma_l']=trends.close.rolling(sma_l).mean()
+            trends['position']=np.where(trends['sma_s']>trends['sma_l'],1,-1) #position to buy and sell 
+
+            #Buy and Hold
+            trends['returns']=np.log(trends.close.div(trends.close.shift(1)))
+
+            #Strategy
+            trends['strategy']=trends.position.shift(1)*trends['returns']
+
+            #For  1 $ invested
+            buy_hold_retuns1dlr=trends[['returns']].sum().apply(np.exp)  
+            strategy_returns=trends[['strategy']].sum().apply(np.exp)   
+           
+            #Exponential returns
+            trends['c_returns']=trends['returns'].cumsum().apply(np.exp)
+            trends['c_strategy']=trends['strategy'].cumsum().apply(np.exp)
+            #st.write(trends)
+          #  st.write(buy_hold_retuns1dlr)  
+
+
+            st.write(f"for {i}:buy and hold returns(1$):{round(buy_hold_retuns1dlr[0],2)}")
+            
+            st.write(f"for {i}:Strategy(1$):{round(strategy_returns[0],2)}")                
+
+
+
+            data_container = st.container()
+
+            with data_container:
+              tab1, tab2 = st.columns(2)
+
+              with tab1:
+                  fig1=go.Figure(data=[go.Scatter(x=trends.index, y=trends['close'],),
+                  go.Scatter(x=trends.index, y=trends.sma_s, line=dict(color='green', width=3),name = 'sma_50' ),
+                   go.Scatter(x=trends.index, y=trends.sma_l, line=dict(color='red', width=3),name = 'sma_200' )])
+
+                  st.plotly_chart(fig1)
+              with tab2:
+                  
+                  fig2=go.Figure(data=[go.Scatter(x=trends.index, y=trends['c_returns'],name = 'buy and hold'),
+                  go.Scatter(x=trends.index, y=trends.c_strategy, line=dict(color='green', width=3),name = 'golden cross strategy' )])
+
+                  st.plotly_chart(fig2)
+
+            st.write("****")
+                  
+
+
+            
+
+
+            
+        #    data['sma_s']=data.i.rolling(sma_s).mean()
+       #     data['sma_l']=data.i.rolling(sma_l).mean()
+         #   st.write(data[i])
+
+          #  return data[i]
+    SMA(data)
+
+
+
+        
+    
+
+
+
 
