@@ -3,5 +3,4 @@ pandas
 yfinance
 
 plotly
-plotly.express
-plotly.graph_objects 
+plotly-express
