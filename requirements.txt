@@ -1,3 +1,7 @@
 streamlit==1.23.0
 pandas
 yfinance
+
+plotly
+plotly.express
+plotly.graph_objects 
